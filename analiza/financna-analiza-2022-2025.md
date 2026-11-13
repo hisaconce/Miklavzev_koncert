@@ -15,6 +15,18 @@
 
 **Glavna ugotovitev:** stroški se gibljejo med približno 900 in 1.450 €, rezultat pa se je od 2023 do 2025 poslabšal za več kot 1.000 €. Večina razlike izhaja iz **prihodkov**: leta 2024 je bilo zbranih 1.100 € prispevkov staršev, za leto 2025 pa prispevek v nobenem viru ni zabeležen (zabeleženih je le 44 € s stojnice).
 
+### Primerjava s predpostavko: 1.000 € prihodkov iz šolnin vsako leto
+
+Ni znano, kolikšen del plačil staršev gre za koncert. Zato je za primerjavo privzeto **1.000 € na leto**. To je okvirni znesek prejšnjih let: 975 € leta 2023 in 1.100 € leta 2024.
+
+| Leto | Stroški | Prihodki (1.000 € + drugo) | Rezultat |
+|---|---:|---:|---:|
+| 2023 | 939 € | 1.000 € | **+61 €** |
+| 2024 | 1.450 € (+124,50 € za šalčke) | 1.100 € (+100 € od prodaje šalčk) | **−350 €** do **−475 €** |
+| 2025 | 1.071 € + ocena manjkajočih materialnih stroškov 300–450 € = 1.371–1.521 € | 1.044 € (+44 € s stojnice) | **−327 €** do **−477 €** |
+
+Leta 2024 je bilo na koncertu okoli 35 učencev. Prispevek 1.100 € je torej pomenil **približno 30 € na učenca**.
+
 ## 2. Stroški po kategorijah
 
 | Kategorija | 2023 | 2024 | 2025 |
