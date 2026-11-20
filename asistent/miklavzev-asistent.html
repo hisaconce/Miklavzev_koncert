@@ -1,0 +1,180 @@
+<title>Miklavžev asistent</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column; countdown band, then pillars as sections with task rows. Accent = mitre crimson, second = candle gold. */
+:root{
+  --bg:#f5f6f9; --surface:#ffffff; --fg:#1b2030; --muted:#5f6679; --line:#dde0e8;
+  --accent:#b3202f; --accent-soft:#f7e3e5; --gold:#a8771a; --ok:#2f7a4f; --ok-soft:#e1f1e7; --late:#b3202f;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12151d; --surface:#1a1e29; --fg:#e8eaf0; --muted:#9aa1b3; --line:#2b3040;
+  --accent:#e2596a; --accent-soft:#3a1d24; --gold:#e0b45a; --ok:#5fc08a; --ok-soft:#183325; --late:#ff7385; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151d; --surface:#1a1e29; --fg:#e8eaf0; --muted:#9aa1b3; --line:#2b3040;
+  --accent:#e2596a; --accent-soft:#3a1d24; --gold:#e0b45a; --ok:#5fc08a; --ok-soft:#183325; --late:#ff7385; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,5vw,40px);font-weight:700}
+h2{font-size:20px;font-weight:700}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+header{display:grid;gap:14px}
+.count{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:baseline}
+.days{font-family:var(--f-display);font-size:56px;font-weight:700;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.days small{font-size:18px;color:var(--fg);font-weight:500;margin-left:6px}
+.meta{color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stats b{color:var(--fg)}
+.stats .late b{color:var(--late)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 12px;font:inherit;font-size:14px;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.notice{padding:10px 14px;border-radius:8px;background:var(--accent-soft);font-size:14px}
+section.pillar{display:grid;gap:8px}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--fg);padding-bottom:6px}
+.ph .n{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{list-style:none;margin:0;padding:0;display:grid}
+li.task{display:grid;grid-template-columns:28px 1fr auto;gap:4px 10px;padding:10px 4px;border-bottom:1px solid var(--line);align-items:start}
+li.task input[type=checkbox]{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ok);cursor:pointer}
+.t{min-width:0}
+.t .title{font-weight:500}
+.t .note{font-size:13px;color:var(--muted);margin-top:2px}
+li.done .title{text-decoration:line-through;color:var(--muted)}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.due{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--fg);white-space:nowrap;font-variant-numeric:tabular-nums}
+.due.soon{background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold)}
+.due.late{background:var(--accent-soft);color:var(--late)}
+li.done .due{background:var(--ok-soft);color:var(--ok)}
+.who{font:inherit;font-size:13px;width:120px;border:1px solid transparent;border-radius:6px;padding:2px 6px;background:transparent;color:var(--fg);text-align:right}
+.who:hover,.who:focus{border-color:var(--line);background:var(--surface);outline:none}
+.who::placeholder{color:var(--muted);font-style:italic}
+.del{border:0;background:none;color:var(--muted);font-size:12px;cursor:pointer;padding:0}
+.del:hover{color:var(--late)}
+form.add{display:flex;flex-wrap:wrap;gap:6px;padding-top:6px}
+form.add input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);min-width:0}
+form.add input[name=naslov]{flex:1 1 220px}
+form.add input[name=rok]{flex:0 0 150px}
+form.add button,.btn{font:inherit;font-size:14px;padding:6px 12px;border-radius:6px;border:1px solid var(--fg);background:var(--fg);color:var(--bg);cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.empty{padding:20px;border:1px dashed var(--line);border-radius:8px;color:var(--muted)}
+footer{font-size:13px;color:var(--muted)}
+@media (max-width:520px){li.task{grid-template-columns:28px 1fr}.side{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between}.who{text-align:left}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Glasbena hiša Čonce · kontrolni seznam priprav</div>
+    <h1>Miklavžev koncert 2026</h1>
+    <div class="count">
+      <div class="days" id="days">–<small>dni</small></div>
+      <div class="meta">četrtek, 10. 12. 2026 · Antonov dom (potrdi)<br>Cilj: 150 obiskovalcev, rezultat vsaj −924 €</div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+    <div class="stats" id="stats"></div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="Prikaz">
+        <button data-f="vse" aria-pressed="true">Vse</button>
+        <button data-f="odprto" aria-pressed="false">Odprto</button>
+        <button data-f="teden" aria-pressed="false">Ta teden</button>
+        <button data-f="zamuja" aria-pressed="false">Zamuja</button>
+      </div>
+    </div>
+    <div class="notice" id="notice" hidden></div>
+  </header>
+  <main id="list"><div class="empty">Nalagam naloge …</div></main>
+  <footer>Kljukice, imena in nove naloge se shranijo za vse, ki imajo stran odprto. Viri: finančna analiza 2022–2025, Notion (projekt Miklavžev koncert, mejniki M1–M3), Drive (Miklavžev koncert 2026, Utrinki 2026).</footer>
+</div>
+
+<script>
+const PILLARS=[
+  ["program","Program in vaje"],["tehnika","Prostor in tehnika"],["ekipa","Ekipa in vloge"],
+  ["promocija","Promocija in povabilo"],["druzine","Družine"],["finance","Finance"],
+  ["dan","Dan koncerta"],["po","Po koncertu"]];
+const CONCERT=new Date(2026,11,10);
+let tasks=[],filter="vse",db=null,canWrite=true;
+const $=s=>document.querySelector(s);
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const parse=s=>{if(!s)return null;const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const fmt=d=>d.getDate()+". "+(d.getMonth()+1)+".";
+const DOW=["ned","pon","tor","sre","čet","pet","sob"];
+function dueInfo(t){const d=parse(t.rok);if(!d)return{cls:"",txt:"brez roka",late:false};
+  const diff=Math.round((d-today())/864e5);
+  if(!t.done&&diff<0)return{cls:"late",txt:"zamuja · "+fmt(d),late:true};
+  if(!t.done&&diff<=3)return{cls:"soon",txt:(diff===0?"danes":DOW[d.getDay()]+" "+fmt(d)),late:false};
+  return{cls:"",txt:DOW[d.getDay()]+" "+fmt(d),late:false}}
+function inWeek(t){const d=parse(t.rok);if(!d)return false;const diff=(d-today())/864e5;return diff<7}
+function el(tag,attrs={},...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k in e&&k!=="list")e[k]=v;else e.setAttribute(k,v)}for(const k of kids)if(k!=null)e.append(k);return e}
+
+function render(){
+  const n=Math.round((CONCERT-today())/864e5);
+  $("#days").firstChild.textContent=n>0?n:(n===0?"Danes":"✓");
+  $("#days small").textContent=n>0?(n===1?"dan do koncerta":n===2?"dneva do koncerta":(n%100>=3&&n%100<=4?"dnevi do koncerta":"dni do koncerta")):"";
+  const done=tasks.filter(t=>t.done).length,late=tasks.filter(t=>dueInfo(t).late).length,week=tasks.filter(t=>!t.done&&inWeek(t)).length;
+  $("#bar").style.width=tasks.length?(done/tasks.length*100)+"%":"0";
+  const st=$("#stats");st.replaceChildren(
+    el("span",{},el("b",{},done+" / "+tasks.length)," opravljenih"),
+    el("span",{class:"late"},el("b",{},String(late))," zamuja"),
+    el("span",{},el("b",{},String(week))," odprtih za ta teden"));
+  const list=$("#list");
+  if(!tasks.length){list.replaceChildren(el("div",{class:"empty"},db?"Seznam je prazen. Dodaj prvo nalogo spodaj pri katerem koli stebru.":"Nalagam naloge …"));if(!db)return}
+  const frag=document.createDocumentFragment();
+  for(const[key,name]of PILLARS){
+    const all=tasks.filter(t=>t.steber===key).sort((a,b)=>(a.rok||"9").localeCompare(b.rok||"9")||(a.red||0)-(b.red||0));
+    const shown=all.filter(t=>filter==="vse"||(filter==="odprto"&&!t.done)||(filter==="teden"&&!t.done&&inWeek(t))||(filter==="zamuja"&&dueInfo(t).late));
+    if(filter!=="vse"&&!shown.length)continue;
+    const ul=el("ul");
+    for(const t of shown){
+      const di=dueInfo(t);
+      const cb=el("input",{type:"checkbox",checked:!!t.done,id:"cb-"+t.id,disabled:!canWrite});
+      cb.setAttribute("aria-label",t.naslov);
+      cb.onchange=()=>save(t.id,{done:cb.checked});
+      const who=el("input",{class:"who",id:"who-"+t.id,value:t.kdo||"",placeholder:"kdo?",disabled:!canWrite});
+      who.setAttribute("aria-label","Odgovorna oseba");
+      who.onchange=()=>save(t.id,{kdo:who.value.trim()});
+      const del=el("button",{class:"del",type:"button",textContent:"odstrani"});
+      del.onclick=()=>{if(del.dataset.c){remove(t.id)}else{del.dataset.c=1;del.textContent="res odstranim?";setTimeout(()=>{delete del.dataset.c;del.textContent="odstrani"},3000)}};
+      ul.append(el("li",{class:"task"+(t.done?" done":"")},cb,
+        el("div",{class:"t"},el("div",{class:"title",textContent:t.naslov}),t.opis?el("div",{class:"note",textContent:t.opis}):null),
+        el("div",{class:"side"},el("span",{class:"due "+di.cls,textContent:di.txt}),who,canWrite?del:null)));
+    }
+    const sec=el("section",{class:"pillar"},
+      el("div",{class:"ph"},el("h2",{textContent:name}),el("span",{class:"n",textContent:all.filter(t=>t.done).length+" / "+all.length})),ul);
+    if(canWrite&&db&&filter==="vse"){
+      const f=el("form",{class:"add"},
+        el("input",{name:"naslov",id:"add-"+key,placeholder:"Nova naloga …",required:true}),
+        el("input",{name:"rok",id:"rok-"+key,type:"date",value:"2026-12-03"}),
+        el("button",{type:"submit",textContent:"Dodaj"}));
+      f.onsubmit=e=>{e.preventDefault();const naslov=f.naslov.value.trim();if(!naslov)return;
+        db.collection("naloge").add({steber:key,naslov,opis:"",rok:f.rok.value||"",kdo:"",done:false,red:Date.now()}).catch(err);f.naslov.value=""};
+      sec.append(f)}
+    frag.append(sec)}
+  list.replaceChildren(frag);
+  if(!list.children.length)list.append(el("div",{class:"empty",textContent:"Ni nalog za ta prikaz."}));
+}
+function notice(m){const n=$("#notice");n.textContent=m;n.hidden=!m}
+function err(e){if(e&&e.code==="invalid_argument"){canWrite=false;notice("Ta seznam lahko samo bereš.");render()}else if(e&&e.code==="quota_exceeded")notice("Seznam je poln. Odstrani nekaj nalog.");else notice("Shranjevanje ni uspelo. Poskusi znova.")}
+const pending=new Map();
+async function save(id,patch){const p=(pending.get(id)||Promise.resolve()).then(()=>db.doc("naloge/"+id).update(patch)).catch(err);pending.set(id,p)}
+function remove(id){db.doc("naloge/"+id).delete().catch(err)}
+
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{filter=b.dataset.f;document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render()});
+render();
+(async()=>{
+  db=await window.claude?.use?.("db");
+  if(!db){notice("Seznam je viden samo v pregledovalniku claude.ai, ko si prijavljen.");$("#list").replaceChildren(el("div",{class:"empty",textContent:"Naloge niso dosegljive v tem pogledu."}));return}
+  const user=await window.claude.use("user");
+  if(user){const c=await user.can("data.write");if(c===false)canWrite=false}
+  const timer=setTimeout(()=>notice("Podatkov še ni mogoče doseči. Stran bo poskušala naprej."),10000);
+  db.collection("naloge").onSnapshot(s=>{if(!s.metadata.fromCache){clearTimeout(timer);notice("")}
+    tasks=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>{clearTimeout(timer);notice("Povezava s seznamom je prekinjena. Osveži stran.")});
+})();
+setInterval(()=>{if(!document.activeElement||document.activeElement===document.body)render()},3600000);
+</script>
